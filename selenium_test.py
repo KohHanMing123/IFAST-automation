@@ -54,3 +54,9 @@ for ref in df['Ref']:
 
 # Close the browser
 driver.quit()
+
+
+# Click into Client, not ref
+# Click into NBS Form ,fill based on given info sent by Nurul
+
+
