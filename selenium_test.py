@@ -4,26 +4,23 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service as ChromeService
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
+from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
 import time
 
-# Chrome driver options
 options = webdriver.ChromeOptions()
 options.add_argument("--start-maximized")
 options.add_experimental_option("detach", True)
 
-# Initialize the driver
 driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
 driver.get('https://global.broker-backoffice.com//modules/investments/broker/')
 
 input("Please log in and click into Investments, then press Enter to continue...")
 
-# Read the Excel sheets
-ref_excel_path = r'C:/Users/winnie/Desktop/code playground/RefNumbers.xlsx'
+ref_excel_path = r'C:/Users/Han Ming/Documents/Han Ming/python learning/IFAST-automation/RefNumbers.xlsx'
 ref_df = pd.read_excel(ref_excel_path)
-nbs_excel_path = r'C:/Users/winnie/Desktop/code playground/NBSForm.xlsx'
+nbs_excel_path = r'C:/Users/Han Ming/Documents/Han Ming/python learning/IFAST-automation/NBSForm.xlsx'
 nbs_df = pd.read_excel(nbs_excel_path)
 
 main_window = driver.current_window_handle
@@ -59,7 +56,6 @@ for ref in ref_df['Ref']:
 
             driver.find_element(By.ID, 'Ref').send_keys(str(nbs_data['Acc No.']))
     
-            # Click on the next input to trigger the popup
             amount_input = driver.find_element(By.ID, 'amount')
             amount_input.click()
             
@@ -71,27 +67,33 @@ for ref in ref_df['Ref']:
             
             amount_input.send_keys(str(nbs_data['Amount Invested']))
 
-            # Click to open the dropdown
             provider_dropdown = driver.find_element(By.XPATH, "//span[contains(@class, 'select-value') and text()='Select a Provider']")
             provider_dropdown.click()
-            print("im here")
+            print("Dropdown opened")
 
-            WebDriverWait(driver, 10).until(
-                EC.visibility_of_element_located((By.XPATH, "//span[@class='select silver-gradient glossy  expandable-list replacement tracking open']//span[@class='drop-down']"))
-            )
-            print("im here 2")
+            select_element = driver.find_element(By.ID, "providers")
 
-            # Locate the desired option in the dropdown
+            driver.execute_script("arguments[0].scrollIntoView();", select_element)
+            time.sleep(1) 
+
             desired_option_text = nbs_data['Provider']
-            desired_option_xpath = f"//span[@class='select silver-gradient glossy  expandable-list replacement tracking open']//span[@class='drop-down']/span[text()='{desired_option_text}']"
-            desired_option = WebDriverWait(driver, 10).until(
-                EC.element_to_be_clickable((By.XPATH, desired_option_xpath))
-            )
-            print("im here 3")
+            driver.execute_script("""
+                var select = arguments[0];
+                var desiredOption = arguments[1];
+                for (var i = 0; i < select.options.length; i++) {
+                    if (select.options[i].text === desiredOption) {
+                        select.options[i].selected = true;
+                        select.dispatchEvent(new Event('change', { 'bubbles': true }));
+                        break;
+                    }
+                }
+            """, select_element, desired_option_text)
+            
+            driver.execute_script("arguments[0].click();", select_element)
 
-            # Scroll into view and click the desired option
-            # driver.execute_script("arguments[0].scrollIntoView(true);", desired_option)
-            desired_option.click()
+            print(f"Selected option: {desired_option_text}")
+
+            time.sleep(10)
 
             # Select other fields based on the NBS data
             # Select(driver.find_element(By.ID, 'productlist')).select_by_visible_text(nbs_data['Product'])
@@ -100,11 +102,11 @@ for ref in ref_df['Ref']:
             # driver.find_element(By.ID, 'upfront_commission').send_keys(str(nbs_data['Upfront Comms']))
 
             # Toggle FAF's switch if necessary
-            # if nbs_data["FAF's"] == 1:
-            #     driver.find_element(By.ID, 'FAF').click()
+            if nbs_data["FAF's"] == 1:
+                driver.find_element(By.ID, 'FAF').click()
             
-            # driver.find_element(By.ID, 'faf_per').send_keys(str(nbs_data['FAF Percentage']))
-            # driver.find_element(By.ID, 'faf_frq').send_keys(nbs_data['FAF Frequency'])
+            driver.find_element(By.ID, 'faf_per').send_keys(str(nbs_data['FAF Percentage']))
+            driver.find_element(By.ID, 'faf_frq').send_keys(nbs_data['FAF Frequency'])
 
         except IndexError:
             print(f"No matching NBS form data found for reference number {ref}")
@@ -117,8 +119,6 @@ for ref in ref_df['Ref']:
         print(f"An error occurred: {str(e)}")
 
 driver.quit()
-
-
 
 
 # import pandas as pd
