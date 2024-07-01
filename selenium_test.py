@@ -67,13 +67,13 @@ for ref in ref_df['Ref']:
             
             amount_input.send_keys(str(nbs_data['Amount Invested']))
 
+
+            # FOR PROVIDER DROPDOWN
             provider_dropdown = driver.find_element(By.XPATH, "//span[contains(@class, 'select-value') and text()='Select a Provider']")
             provider_dropdown.click()
             print("Dropdown opened")
 
             select_element = driver.find_element(By.ID, "providers")
-
-            driver.execute_script("arguments[0].scrollIntoView();", select_element)
             time.sleep(1) 
 
             desired_option_text = nbs_data['Provider']
@@ -93,20 +93,127 @@ for ref in ref_df['Ref']:
 
             print(f"Selected option: {desired_option_text}")
 
-            time.sleep(10)
+            time.sleep(1)
 
-            # Select other fields based on the NBS data
-            # Select(driver.find_element(By.ID, 'productlist')).select_by_visible_text(nbs_data['Product'])
-            # Select(driver.find_element(By.ID, 'bespoke_428')).select_by_visible_text(nbs_data['Type'])
-            # Select(driver.find_element(By.ID, 'User')).select_by_visible_text(nbs_data['Agent'])
-            # driver.find_element(By.ID, 'upfront_commission').send_keys(str(nbs_data['Upfront Comms']))
+            # FOR PRODUCT DROPDOWN
+            product_dropdown = driver.find_element(By.CSS_SELECTOR, 'span[id="productlist-holder"]')
+            product_dropdown.click()
+            print("Product dropdown opened")
 
-            # Toggle FAF's switch if necessary
+            select_element_product = driver.find_element(By.ID, "productlist")
+            print("aft productlist")
+            time.sleep(1)
+
+            print("starting to get data Product from excel")
+            desired_product_option_text = str(nbs_data['Product'])
+            print(f"desired product option text is {desired_product_option_text}")
+            driver.execute_script("""
+                var select = arguments[0];
+                var desiredOption = arguments[1];
+                for (var i = 0; i < select.options.length; i++) {
+                    if (select.options[i].text === desiredOption) {
+                        select.options[i].selected = true;
+                        select.dispatchEvent(new Event('change', { 'bubbles': true }));
+                        break;
+                    }
+                }
+            """, select_element_product, desired_product_option_text)
+            
+            driver.execute_script("arguments[0].click();", select_element_product)
+
+            print(f"Selected product option: {desired_product_option_text}")
+
+            # FOR TYPE DROPDOWN
+            type_dropdown = driver.find_element(By.XPATH, "//span[contains(@class, 'select-value') and text()='Select from list']")
+            type_dropdown.click()
+            print("Type dropdown opened")
+
+            select_element_type = driver.find_element(By.ID, "bespoke_428")
+            print("element select found for type")
+            time.sleep(1)
+    
+            desired_type_option_text = nbs_data['Type']
+            print(f"desired product option text is {desired_type_option_text}")
+            driver.execute_script("""
+                var select = arguments[0];
+                var desiredOption = arguments[1];
+                for (var i = 0; i < select.options.length; i++) {
+                    if (select.options[i].text === desiredOption) {
+                        select.options[i].selected = true;
+                        select.dispatchEvent(new Event('change', { 'bubbles': true }));
+                        break;
+                    }
+                }
+            """, select_element_type, desired_type_option_text)
+            
+            driver.execute_script("arguments[0].click();", select_element_type)
+
+            print(f"Selected product option: {desired_type_option_text}")
+
+            # FOR AGENT DROPDOWN
+            agent_dropdown = driver.find_element(By.XPATH, "//span[contains(@class, 'select-value') and text()='Singh,  Deepak']") # All agent names are double spaced after first name,
+            agent_dropdown.click()
+            print("Agent dropdown opened")
+
+            select_element_agent = driver.find_element(By.ID, "User")
+            print("element select found for agent")
+            time.sleep(1)
+    
+            desired_agent_option_text = nbs_data['Agent']
+            print(f"desired product option text is {desired_agent_option_text}")
+            driver.execute_script("""
+                var select = arguments[0];
+                var desiredOption = arguments[1];
+                for (var i = 0; i < select.options.length; i++) {
+                    if (select.options[i].text === desiredOption) {
+                        select.options[i].selected = true;
+                        select.dispatchEvent(new Event('change', { 'bubbles': true }));
+                        break;
+                    }
+                }
+            """, select_element_agent, desired_agent_option_text)
+            
+            driver.execute_script("arguments[0].click();", select_element_agent)
+
+            print(f"Selected product option: {desired_agent_option_text}")
+
+            driver.find_element(By.ID, 'upfront_commission').send_keys(str(nbs_data['Upfront Comms']))
+
+            # Toggle FAF's switch if true, 1
             if nbs_data["FAF's"] == 1:
                 driver.find_element(By.ID, 'FAF').click()
             
             driver.find_element(By.ID, 'faf_per').send_keys(str(nbs_data['FAF Percentage']))
-            driver.find_element(By.ID, 'faf_frq').send_keys(nbs_data['FAF Frequency'])
+
+            # FOR FAF FREQUENCY DROPDOWN
+            faf_freq_dropdown = driver.find_element(By.XPATH, "//span[contains(@class, 'select-value') and text()=' Annually']")
+            faf_freq_dropdown.click()
+            print("faf freq dropdown opened")
+
+            select_element_faf_freq = driver.find_element(By.ID, "faf_frq")
+            print("element select found for faf freq")
+            time.sleep(1)
+    
+            desired_faf_freq_option_text = nbs_data['FAF Frequency']
+            print(f"desired product option text is {desired_faf_freq_option_text}")
+            driver.execute_script("""
+                var select = arguments[0];
+                var desiredOption = arguments[1];
+                for (var i = 0; i < select.options.length; i++) {
+                    if (select.options[i].text === desiredOption) {
+                        select.options[i].selected = true;
+                        select.dispatchEvent(new Event('change', { 'bubbles': true }));
+                        break;
+                    }
+                }
+            """, select_element_faf_freq, desired_faf_freq_option_text)
+            
+            driver.execute_script("arguments[0].click();", select_element_faf_freq)
+
+            print(f"Selected product option: {desired_faf_freq_option_text}")
+
+            driver.find_element(By.ID, 'fl_menu').click()
+            print(f"{ref} has been saved")
 
         except IndexError:
             print(f"No matching NBS form data found for reference number {ref}")
