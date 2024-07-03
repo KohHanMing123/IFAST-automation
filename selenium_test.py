@@ -8,6 +8,7 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
 import time
+import threading
 from datetime import datetime
 from nbs_form import fill_nbs_form
 from process_form import get_valid_f2f_answer, process_form
@@ -22,28 +23,157 @@ driver.get('https://global.broker-backoffice.com//modules/investments/broker/')
 input("Please log in and click into Investments, then press Enter to continue...")
 
 # Paths for Excel files
-ref_excel_path = r'C:/Users/Han Ming/Documents/Han Ming/python learning/IFAST-automation/RefNumbers.xlsx'  # to be made dynamic
-nbs_excel_path = r'C:/Users/Han Ming/Documents/Han Ming/python learning/IFAST-automation/NBSForm.xlsx'  # to be made dynamic
+# ref_excel_path = r'C:/Users/winnie/Desktop/code playground/RefNumbers.xlsx'  # to be made dynamic
+nbs_excel_path = r'C:/Users/winnie/Desktop/code playground/NBSForm.xlsx'  # to be made dynamic
 
-ref_df = pd.read_excel(ref_excel_path)
+# ref_df = pd.read_excel(ref_excel_path)
 nbs_df = pd.read_excel(nbs_excel_path)
 
 main_window = driver.current_window_handle
 
-for ref in ref_df['Ref']:
-    search_input = driver.find_element(By.NAME, 'ref')
-    search_input.clear()
-    search_input.send_keys(ref)
-    print(f'Searching for: {ref}')
-    search_input.send_keys(Keys.RETURN)
+# for ref in nbs_df['Acc No.']:
+#     if pd.isna(ref):
+#         print("No more account numbers to process.")
+#         break
+
+#     search_input = driver.find_element(By.NAME, 'ref')
+#     search_input.clear()
+#     search_input.send_keys(ref)
+#     print(f'Searching for: {ref}')
+#     search_input.send_keys(Keys.RETURN)
+#     time.sleep(3)
+
+#     fill_nbs_form(driver, ref, nbs_df, main_window)  # performs all nbs form filling
+
+#     f2f_valid_answer = get_valid_f2f_answer(driver, main_window)
+
+#     if f2f_valid_answer:
+#         process_form(driver, main_window, ref, nbs_df, f2f_valid_answer)
+
+# to click the commission tab after no ref number left
+try:
+    commission_tab = driver.find_element(By.XPATH, '//*[@id="commission"]')
+    commission_tab.click()
+    print("Clicked on the Commission tab.")
     time.sleep(3)
 
-    # fill_nbs_form(driver, ref, nbs_df, main_window)  # performs all nbs form filling
+    # Process each record in the "processlist" table by opening in new tabs
+    # processlist = driver.find_element(By.ID, 'processlist')
+    # rows = processlist.find_elements(By.TAG_NAME, 'tr')
 
-    f2f_valid_answer = get_valid_f2f_answer(driver, main_window)
+    # for row in rows:
+    #     try:
+    #         process_button = row.find_element(By.XPATH, './/a[contains(@id, "Processing") and contains(text(), "Process")]')
+            
+    #         process_button_link = process_button.get_attribute('href')
 
-    if f2f_valid_answer:
-        process_form(driver, main_window, ref, nbs_df, f2f_valid_answer)
+    #         driver.execute_script(f"window.open('{process_button_link}', '_blank');")
+    #         time.sleep(2)
+    #     except Exception as e:
+    #         print(f"Error processing row: {str(e)}")
+
+    # print("All tabs opened. Processing each tab now...")
+
+    # # Switch to each tab, scroll down, and click the "PROCESS NOW" button
+    # all_tabs = driver.window_handles
+    # for tab in all_tabs[1:]:
+    #     driver.switch_to.window(tab)
+    #     time.sleep(3)
+    #     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+    #     time.sleep(1)
+    #     try:
+    #         process_now_button = driver.find_element(By.XPATH, '//*[@value="PROCESS NOW"]')
+    #         process_now_button.click()
+    #         print(f"Clicked 'PROCESS NOW' button in tab: {tab}")
+    #         time.sleep(1)
+    #         # driver.close()
+    #     except Exception as e:
+    #         print(f"Error clicking 'PROCESS NOW' button in tab {tab}: {str(e)}")
+
+    # driver.switch_to.window(main_window)
+    # print("Processing completed.")
+    
+    # Process "Pay Now" buttons in "To Payout" tab
+    # to_payout_tab = driver.find_element(By.XPATH, '//*[@id="To Payout"]')  
+    # to_payout_tab.click()
+    # print("Clicked on the To Payout tab.")
+    # time.sleep(3)
+
+    # payout_list = driver.find_element(By.ID, 'processlist')
+    # payout_rows = payout_list.find_elements(By.TAG_NAME, 'tr')
+
+    # for row in payout_rows:
+    #     print(f"how many inside {payout_rows}")
+    #     try:
+    #         pay_now_button = row.find_element(By.XPATH, './/a[contains(@id, "Processing") and contains(text(), "Pay Now")]')
+    #         pay_now_button.click()
+    #         time.sleep(3)
+
+    #         # Switch to the newly opened window
+    #         new_window = driver.window_handles[-1]
+    #         driver.switch_to.window(new_window)
+    #         time.sleep(1)
+
+    #         try:
+    #             save_button = driver.find_element(By.XPATH, '//*[@id="fl_menu"]')
+    #             save_button.click()
+    #             print("Clicked 'Save' button")
+    #             time.sleep(1)
+    #             driver.back()  # Switch back to the main window
+    #             time.sleep(2) 
+
+    #         except Exception as e:
+    #             print(f"Error clicking 'Save' button: {str(e)}")
+
+    #     except Exception as e:
+    #         print(f"Error processing row in payout list: {str(e)}")
+
+    # print("All payouts processed.")
+
+
+    # Expected In tab
+    expected_in_tab = driver.find_element(By.XPATH, '//*[@id="Expected In"]')  
+    expected_in_tab.click()
+    print("Clicked on the Expected In tab.")
+
+    processlist = driver.find_element(By.ID, 'processlist')
+    expected_in_rows = processlist.find_elements(By.TAG_NAME, 'tr')
+
+    for row in expected_in_rows:
+        try:
+            # Find the <a> tag within the row
+            provider_name = row.find_element(By.XPATH, './/td/a[@id="Processing"]').text.strip()
+            print(f"provider name is {provider_name}")
+            
+            # Check if provider_name matches the value in the NBS form's Provider column
+            print(f"provider in {nbs_df['Provider'][0]}")
+            if provider_name == nbs_df['Provider'][0]: 
+
+                row.find_element(By.XPATH, './/td/a[@id="Processing"]').click()
+                print(f"Clicked on '{provider_name}' link.")
+                time.sleep(3)  # Adjust wait time after clicking the link
+
+                checkboxes = driver.find_elements(By.XPATH, '//input[@type="checkbox"]')
+                for checkbox in checkboxes:
+                    checkbox.click()
+                    print(f"Checked checkbox: {checkbox.get_attribute('id')}")
+                    
+            else:
+                print(f"Provider name '{provider_name}' does not match expected value.")
+
+        except Exception as e:
+            print(f"Error processing row in Expected In tab: {str(e)}")
+
+    print("All records processed in Expected In tab.")
+
+
+except Exception as e:
+    print(f"Error accessing or processing the To Payout tab: {str(e)}")
+
+
+# Close the main window after processing
+# driver.quit()
+
 
 # driver.switch_to.window(main_window)
 

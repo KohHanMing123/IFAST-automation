@@ -148,7 +148,8 @@ def fill_nbs_form(driver, ref, nbs_df, main_window):
             print(f"Selected product option: {desired_type_option_text}")
 
             # FOR AGENT DROPDOWN
-            agent_dropdown = driver.find_element(By.XPATH, "//span[contains(@class, 'select-value') and text()='Singh,  Deepak']")  # All agent names are double spaced after first name, excel can just use single space eg. lastname, firstname
+            # agent_dropdown = driver.find_element(By.XPATH, "//span[contains(@class, 'select-value') and text()='Singh,  Deepak']")  # All agent names are double spaced after first name, excel can just use single space eg. lastname, firstname
+            agent_dropdown = driver.find_element(By.XPATH, '//*[@id="investform"]/fieldset/div/div[6]/span/span[1]') 
             agent_dropdown.click()
             print("Agent dropdown opened")
 
@@ -184,6 +185,8 @@ def fill_nbs_form(driver, ref, nbs_df, main_window):
                 )
                 faf_checkbox.click()
 
+            time.sleep(2)
+
             driver.find_element(By.ID, 'fl_menu').click()
             print(f"{ref} has been saved")
 
@@ -199,15 +202,17 @@ def fill_nbs_form(driver, ref, nbs_df, main_window):
                 alert = WebDriverWait(driver, 3).until(EC.alert_is_present())
                 alert.accept()
                 print("Alert closed")
+
             except Exception as e:
                 print("No alert found or an error occurred:", str(e))
 
-            # first_row_ref_col = driver.find_element(By.CSS_SELECTOR, 'tr[id="1"] a.newWindow.left')
-            # first_row_ref_col.click()
             print("ref col clicked after page reload")
 
         except IndexError:
             print(f"No matching NBS form data found for reference number {ref}")
+    
+    except IndexError:
+        print(f"There is no record for {ref}")
 
     except Exception as e:
         print(f"An error occurred in fill_nbs_form: {str(e)}")

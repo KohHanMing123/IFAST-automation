@@ -3,6 +3,7 @@ from datetime import datetime
 import pandas as pd
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 
 def get_valid_f2f_answer(driver, main_window):
@@ -11,7 +12,7 @@ def get_valid_f2f_answer(driver, main_window):
     while True:
         try:
             print(f"Processing row id {row_id}")
-            client_col_next = driver.find_element(By.CSS_SELECTOR, f'tr[id="{row_id}"] a.newWindow.left')
+            client_col_next = driver.find_element(By.CSS_SELECTOR, f'tr[id="{row_id}"] a.newWindow.left')   
             client_col_next.click()
             time.sleep(3)
 
@@ -19,10 +20,11 @@ def get_valid_f2f_answer(driver, main_window):
             for window_next in all_windows_next:
                 if window_next != main_window:
                     driver.switch_to.window(window_next)
-                    driver.maximize_window()
                     break
-
+            
+            time.sleep(1)
             dropdown_xpath = '//*[@id="investment"]/fieldset/div[2]/div[6]/span/span[1]'
+            # WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, dropdown_xpath)))
 
             face_to_face_dropdown = driver.find_element(By.XPATH, dropdown_xpath)
             current_value = face_to_face_dropdown.text.strip()
@@ -50,8 +52,19 @@ def process_form(driver, main_window, ref, nbs_df, f2f_valid_answer):
     print(f"Proceeding with valid answer: {f2f_valid_answer}")
         
     try:
-        print(f"Returning to the first row id 1")
-        client_col_first = driver.find_element(By.CSS_SELECTOR, 'tr[id="1"] a.newWindow.left')
+        print(f"Returning to the first row id 1 USING XPATH")
+        client_col_first = driver.find_element(By.XPATH, '/html/body/div[2]/div[2]/div[2]/span/table[3]/tbody/tr[1]/td[1]/a')
+
+        driver.execute_script("arguments[0].scrollIntoView(true);", client_col_first)
+        time.sleep(1) 
+
+        try:
+            tooltip = driver.find_element(By.CLASS_NAME, 'ui-tooltip')
+            driver.execute_script("arguments[0].style.display = 'none';", tooltip)
+            time.sleep(1)
+        except:
+            pass
+
         client_col_first.click()
         time.sleep(3)
 
@@ -63,6 +76,7 @@ def process_form(driver, main_window, ref, nbs_df, f2f_valid_answer):
                 break
         
         time.sleep(1)
+
         # F2F DROPDOWN
         f2f_dropdown = driver.find_element(By.XPATH, "//span[contains(@class, 'select-value') and text()='Select from list']")
         f2f_dropdown.click()
@@ -99,12 +113,12 @@ def process_form(driver, main_window, ref, nbs_df, f2f_valid_answer):
         driver.execute_script("arguments[0].removeAttribute('readonly')", date_picker)
         date_picker.clear()
         date_picker.send_keys(date_issued_formatted)
-
+        date_picker.send_keys(Keys.RETURN)
         print(f"Date picker set to: {date_issued_formatted}")
 
         # WRITTEN IN DROPDOWN
         wi_dropdown = driver.find_element(By.XPATH, '//*[@id="investment"]/fieldset/div[2]/div[12]/span/span[1]')
-        f2f_dropdown.click()
+        wi_dropdown.click()
         print("WI dropdown opened")
 
         select_element_wi = driver.find_element(By.ID, "country")
@@ -130,6 +144,9 @@ def process_form(driver, main_window, ref, nbs_df, f2f_valid_answer):
         print(f"Selected wi option: {desired_wi_option_text}")
 
         driver.find_element(By.ID, 'city').send_keys("Asia")
+
+        driver.execute_script("scroll(0, 350);")
+        print("scrolled to middle page")
         
         #COST CENTRE DD
         cc_dropdown = driver.find_element(By.XPATH, '//*[@id="investment"]/fieldset/div[2]/div[14]/span/span[1]')
@@ -159,7 +176,9 @@ def process_form(driver, main_window, ref, nbs_df, f2f_valid_answer):
         print(f"Selected cost centre: {desired_cc_option_text}")
 
         #STATUS DD
-        status_dropdown = driver.find_element(By.XPATH, "//span[contains(@class, 'select-value') and text()='In Transit']")
+        status_dropdown = driver.find_element(By.XPATH, '//*[@id="investment"]/fieldset/div[2]/div[16]/span/span[1]')
+
+        print("am i found for status")
         status_dropdown.click()
         print("status dropdown opened")
 
@@ -185,14 +204,14 @@ def process_form(driver, main_window, ref, nbs_df, f2f_valid_answer):
         driver.execute_script("arguments[0].click();", select_element_status)
         print(f"Selected cost centre: {desired_status_option_text}")
 
-        # driver.find_element(By.ID, 'fl_menu').click()
+        driver.find_element(By.ID, 'fl_menu').click()
         print(f"{ref} has been changed to Process Now")
 
         driver.close()
         # close process form window, switch back to the main window
         driver.switch_to.window(main_window)
 
-        time.sleep(20)
+        time.sleep(5)
 
     except Exception as e:
         print(f"Error processing first row: {str(e)}")
