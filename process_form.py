@@ -2,9 +2,7 @@ import time
 from datetime import datetime
 import pandas as pd
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support import expected_conditions as EC
 
 def get_valid_f2f_answer(driver, main_window):
     f2f_valid_answer = None
@@ -210,7 +208,6 @@ def process_form(driver, main_window, ref, nbs_df, f2f_valid_answer):
         driver.close()
         # close process form window, switch back to the main window
         driver.switch_to.window(main_window)
-
         time.sleep(5)
 
     except Exception as e:
