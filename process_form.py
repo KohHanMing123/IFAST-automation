@@ -115,9 +115,12 @@ def process_form(driver, main_window, ref, nbs_df, f2f_valid_answer):
         print(f"Date picker set to: {date_issued_formatted}")
 
         # WRITTEN IN DROPDOWN
-        wi_dropdown = driver.find_element(By.XPATH, '//*[@id="investment"]/fieldset/div[2]/div[12]/span/span[1]')
-        wi_dropdown.click()
-        print("WI dropdown opened")
+        try:
+            wi_dropdown = driver.find_element(By.XPATH, '//*[@id="investment"]/fieldset/div[2]/div[12]/span/span[1]')
+            driver.execute_script("arguments[0].click();", wi_dropdown)
+            print("WI dropdown opened")
+        except Exception as e:
+            print(f"Error clicking WI dropdown: {str(e)}")
 
         select_element_wi = driver.find_element(By.ID, "country")
         print("element select found for WI")
@@ -147,9 +150,12 @@ def process_form(driver, main_window, ref, nbs_df, f2f_valid_answer):
         print("scrolled to middle page")
         
         #COST CENTRE DD
-        cc_dropdown = driver.find_element(By.XPATH, '//*[@id="investment"]/fieldset/div[2]/div[14]/span/span[1]')
-        cc_dropdown.click()
-        print("CC dropdown opened")
+        try:
+            cc_dropdown = driver.find_element(By.XPATH, '//*[@id="investment"]/fieldset/div[2]/div[14]/span/span[1]')
+            driver.execute_script("arguments[0].click();", wi_dropdown)
+            print("CC dropdown opened")
+        except Exception as e:
+            print(f"Error clicking CC dropdown: {str(e)}")
 
         select_element_cc = driver.find_element(By.ID, "costcenter")
         print("element select found for cc")
@@ -174,11 +180,14 @@ def process_form(driver, main_window, ref, nbs_df, f2f_valid_answer):
         print(f"Selected cost centre: {desired_cc_option_text}")
 
         #STATUS DD
-        status_dropdown = driver.find_element(By.XPATH, '//*[@id="investment"]/fieldset/div[2]/div[16]/span/span[1]')
+        try:
+            status_dropdown = driver.find_element(By.XPATH, '//*[@id="investment"]/fieldset/div[2]/div[16]/span/span[1]')
 
-        print("am i found for status")
-        status_dropdown.click()
-        print("status dropdown opened")
+            print("am i found for status")
+            driver.execute_script("arguments[0].click();", status_dropdown)
+            print("status dropdown opened")
+        except Exception as e:
+            print(f"Error clicking CC dropdown: {str(e)}")
 
         select_element_status = driver.find_element(By.ID, "Pstatus")
         print("element select found for status")

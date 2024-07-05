@@ -93,7 +93,7 @@ def to_payout_tab(driver):
         except Exception as e:
             print(f"Error processing row: {str(e)}")
             break
-
+            
     print("Finished processing the Pay Now tab.")
 
 def expected_in_tab(driver, nbs_df):    
@@ -128,7 +128,7 @@ def expected_in_tab(driver, nbs_df):
                 else:
                     print(f"Provider name '{provider_name}' does not match expected value.")
             except NoSuchElementException:
-                print(f"No Provider link found in the current row for provider: {provider_name}")
+                print("No Provider link found in the current row.")
             except Exception as e:
                 print(f"Error processing row in Expected In tab: {str(e)}")
     except NoSuchElementException:
