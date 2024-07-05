@@ -21,7 +21,7 @@ input("Please log in and click into Investments, then press Enter to continue...
 
 desktop_dir = os.path.join(os.path.expanduser('~'), 'Desktop')
 
-nbs_excel_path = os.path.join(desktop_dir, 'NBSForm.xlsx') # target machines desktop folder
+nbs_excel_path = os.path.join(desktop_dir, 'NBSForm.xlsx') # target any machines desktop folder
 
 nbs_df = pd.read_excel(nbs_excel_path)
 
