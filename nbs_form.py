@@ -2,12 +2,16 @@ import time
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import NoSuchElementException
 
 def fill_nbs_form(driver, ref, nbs_df, main_window):
     try:
-        first_row_client_col = driver.find_element(By.CSS_SELECTOR, 'tr[id="1"] a.newWindow:not(.left)')
-        first_row_client_col.click()
-
+        try:
+            first_row_client_col = driver.find_element(By.CSS_SELECTOR, 'tr[id="1"] a.newWindow:not(.left)')
+            first_row_client_col.click()
+        except NoSuchElementException:
+            raise Exception(f"Element not found for reference {ref}")
+        
         time.sleep(3)
 
         all_windows = driver.window_handles
@@ -148,7 +152,6 @@ def fill_nbs_form(driver, ref, nbs_df, main_window):
             print(f"Selected product option: {desired_type_option_text}")
 
             # FOR AGENT DROPDOWN
-            # agent_dropdown = driver.find_element(By.XPATH, "//span[contains(@class, 'select-value') and text()='Singh,  Deepak']")  # All agent names are double spaced after first name, excel can just use single space eg. lastname, firstname
             agent_dropdown = driver.find_element(By.XPATH, '//*[@id="investform"]/fieldset/div/div[6]/span/span[1]') 
             agent_dropdown.click()
             print("Agent dropdown opened")
@@ -167,7 +170,7 @@ def fill_nbs_form(driver, ref, nbs_df, main_window):
                         select.options[i].selected = true;
                         select.dispatchEvent(new Event('change', { 'bubbles': true }));
                         break;
-                    }
+                    }   
                 }
             """, select_element_agent, desired_agent_option_text)
 
@@ -209,10 +212,7 @@ def fill_nbs_form(driver, ref, nbs_df, main_window):
             print("ref col clicked after page reload")
 
         except IndexError:
-            print(f"No matching NBS form data found for reference number {ref}")
+            raise Exception(f"No matching NBS form data found for reference number {ref}")
     
-    except IndexError:
-        print(f"There is no record for {ref}")
-
     except Exception as e:
-        print(f"An error occurred in fill_nbs_form: {str(e)}")
+        raise Exception(f"An error occurred in fill_nbs_form: {str(e)}")

@@ -1,59 +1,69 @@
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 import time
 
 def open_tab(driver, tab_xpath):
-    tab = driver.find_element(By.XPATH, tab_xpath)
-    tab.click()
-    print(f"Clicked on the tab with XPath: {tab_xpath}")
-    time.sleep(3)
+    try:
+        tab = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, tab_xpath)))
+        tab.click()
+        print(f"Clicked on the tab with XPath: {tab_xpath}")
+        time.sleep(3)
+    except TimeoutException:
+        print(f"Timeout while trying to click on the tab with XPath: {tab_xpath}")
 
 def processing_tab(driver):
-    processlist = driver.find_element(By.ID, 'processlist')
-    processing_rows = processlist.find_elements(By.TAG_NAME, 'tr')
+    try:
+        processlist = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, 'processlist')))
+        processing_rows = processlist.find_elements(By.TAG_NAME, 'tr')
 
-    if not processing_rows:
-        print("No rows to process in Processing tab.")
-        return
+        if not processing_rows:
+            print("No rows to process in Processing tab.")
+            return
 
-    any_rows_processed = False 
+        any_rows_processed = False
 
-    for row in processing_rows:
-        try:
-            process_button = row.find_element(By.XPATH, './/a[contains(@id, "Processing") and contains(text(), "Process")]')
-            process_button_link = process_button.get_attribute('href')
-            driver.execute_script(f"window.open('{process_button_link}', '_blank');")
-            time.sleep(2)
-            any_rows_processed = True
-        except NoSuchElementException:
-            print("No 'Process' button found in this row.")
+        for row in processing_rows:
+            try:
+                process_button = row.find_element(By.XPATH, './/a[contains(@id, "Processing") and contains(text(), "Process")]')
+                process_button_link = process_button.get_attribute('href')
+                driver.execute_script(f"window.open('{process_button_link}', '_blank');")
+                time.sleep(2)
+                any_rows_processed = True
+            except NoSuchElementException:
+                print("No 'Process' button found in this row.")
 
-    if not any_rows_processed:
-        print("No 'Process' buttons found in any rows.")
+        if not any_rows_processed:
+            print("No 'Process' buttons found in any rows.")
 
-    print("All tabs opened. Processing each tab now...")
+        print("All tabs opened. Processing each tab now...")
 
-    all_tabs = driver.window_handles
-    for tab in all_tabs[1:]:
-        driver.switch_to.window(tab)
-        time.sleep(3)
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(1)
-        try:
-            process_now_button = driver.find_element(By.XPATH, '//*[@value="PROCESS NOW"]')
-            process_now_button.click()
-            print(f"Clicked 'PROCESS NOW' button in tab: {tab}")
+        all_tabs = driver.window_handles
+        for tab in all_tabs[1:]:
+            driver.switch_to.window(tab)
+            time.sleep(3)
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             time.sleep(1)
-        except Exception as e:
-            print(f"Error clicking 'PROCESS NOW' button in tab {tab}: {str(e)}")
+            try:
+                process_now_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@value="PROCESS NOW"]')))
+                process_now_button.click()
+                print(f"Clicked 'PROCESS NOW' button in tab: {tab}")
+                time.sleep(1)
+            except TimeoutException:
+                print(f"Error clicking 'PROCESS NOW' button in tab {tab}")
 
-    driver.switch_to.window(all_tabs[0])
-    print("Processing completed.")
+        driver.switch_to.window(all_tabs[0])
+        print("Processing completed.")
+    except NoSuchElementException as e:
+        print(f"Error in processing_tab: {str(e)}")
+    except TimeoutException as e:
+        print(f"Timeout error in processing_tab: {str(e)}")
 
 def to_payout_tab(driver):
     while True:
         try:
-            payout_list = driver.find_element(By.ID, 'processlist')
+            payout_list = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, 'processlist')))
             payout_rows = payout_list.find_elements(By.TAG_NAME, 'tr')
             print("Payout rows found")
 
@@ -75,7 +85,7 @@ def to_payout_tab(driver):
                         driver.switch_to.window(window)
                         break
 
-                save_button = driver.find_element(By.XPATH, '//*[@id="fl_menu"]')
+                save_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@id="fl_menu"]')))
                 save_button.click()
                 print("Clicked the 'Save' button.")
                 time.sleep(2)
@@ -96,10 +106,10 @@ def to_payout_tab(driver):
             
     print("Finished processing the Pay Now tab.")
 
-def expected_in_tab(driver, nbs_df):    
+def expected_in_tab(driver, nbs_df):
     try:
-        processlist = driver.find_element(By.ID, 'processlist')
-        expected_in_rows = processlist.find_elements(By.TAG_NAME, 'tr')
+        expected_in_list = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, 'processlist')))
+        expected_in_rows = expected_in_list.find_elements(By.TAG_NAME, 'tr')
 
         if not expected_in_rows:
             print("No rows to process in Expected In tab.")
@@ -109,9 +119,9 @@ def expected_in_tab(driver, nbs_df):
             try:
                 provider_name = row.find_element(By.XPATH, './/td/a[@id="Processing"]').text.strip()
                 print(f"Provider name is {provider_name}")
-
                 print(f"Provider in {nbs_df['Provider'][0]}")
-                if provider_name == nbs_df['Provider'][0]: 
+
+                if provider_name == nbs_df['Provider'][0]:
                     row.find_element(By.XPATH, './/td/a[@id="Processing"]').click()
                     print(f"Clicked on '{provider_name}' link.")
                     time.sleep(3)
@@ -121,7 +131,7 @@ def expected_in_tab(driver, nbs_df):
                         checkbox.click()
                         print(f"Checked checkbox: {checkbox.get_attribute('id')}")
 
-                    update_received_button = driver.find_element(By.XPATH, '//*[@value="Update Received"]')
+                    update_received_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//*[@value="Update Received"]')))
                     update_received_button.click()
                     print("Clicked the 'Update Received' button.")
                     print(f"Process done for provider: {nbs_df['Provider'][0]}")

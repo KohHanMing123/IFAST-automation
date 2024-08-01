@@ -704,6 +704,30 @@
    'C:\\Users\\Han '
    'Ming\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\codeop.py',
    'PYMODULE'),
+  ('colorama',
+   'C:\\Users\\Han '
+   'Ming\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\colorama\\__init__.py',
+   'PYMODULE'),
+  ('colorama.ansi',
+   'C:\\Users\\Han '
+   'Ming\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\colorama\\ansi.py',
+   'PYMODULE'),
+  ('colorama.ansitowin32',
+   'C:\\Users\\Han '
+   'Ming\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\colorama\\ansitowin32.py',
+   'PYMODULE'),
+  ('colorama.initialise',
+   'C:\\Users\\Han '
+   'Ming\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\colorama\\initialise.py',
+   'PYMODULE'),
+  ('colorama.win32',
+   'C:\\Users\\Han '
+   'Ming\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\colorama\\win32.py',
+   'PYMODULE'),
+  ('colorama.winterm',
+   'C:\\Users\\Han '
+   'Ming\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\site-packages\\colorama\\winterm.py',
+   'PYMODULE'),
   ('colorsys',
    'C:\\Users\\Han '
    'Ming\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\colorsys.py',
