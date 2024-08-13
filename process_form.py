@@ -65,13 +65,17 @@ def process_form(driver, main_window, ref, nbs_df, f2f_valid_answer):
     print(f"Proceeding with valid answer: {f2f_valid_answer}")
         
     try:
-        print(f"Returning to the first row id 1 USING XPATH")
+        print(f"Returning to the first row id 1 USING CSS SELECTOR")
+        # client_col_first = WebDriverWait(driver, 10).until(
+        #     EC.element_to_be_clickable((By.XPATH, '/html/body/div[2]/div[2]/div[2]/span/table[3]/tbody/tr[1]/td[1]/a'))
+        # )
         client_col_first = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.XPATH, '/html/body/div[2]/div[2]/div[2]/span/table[3]/tbody/tr[1]/td[1]/a'))
+            EC.element_to_be_clickable((By.CSS_SELECTOR, 'tr[id="1"] a#policyinfo'))
         )
-        driver.execute_script("arguments[0].scrollIntoView(true);", client_col_first)
-        time.sleep(1) 
+        # driver.execute_script("arguments[0].scrollIntoView(true);", client_col_first) 
 
+        time.sleep(1) 
+        
         try:
             tooltip = driver.find_element(By.CLASS_NAME, 'ui-tooltip')
             driver.execute_script("arguments[0].style.display = 'none';", tooltip)
