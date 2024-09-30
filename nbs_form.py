@@ -198,6 +198,7 @@ def fill_nbs_form(driver, ref, nbs_df, main_window):
             # close nbs form window, switch back to the main window
             driver.switch_to.window(main_window)
 
+            time.sleep(2)
             driver.refresh()
 
             # reload page and close the alert for resubmission

@@ -13,6 +13,26 @@ def open_tab(driver, tab_xpath):
     except TimeoutException:
         print(f"Timeout while trying to click on the tab with XPath: {tab_xpath}")
 
+def extract_processing_refs(driver):
+    processing_refs = set()
+
+    try:
+        processlist = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, 'processlist')))
+        processing_rows = processlist.find_elements(By.CSS_SELECTOR, '#processlist > tr')
+
+        for row in processing_rows:
+            try:
+                ref_number = row.find_element(By.CSS_SELECTOR, 'td:nth-child(1) > a').text.strip()
+                processing_refs.add(ref_number)
+                print(f"Found ref number: {ref_number}")
+            except NoSuchElementException:
+                print("No reference number found in this row.")
+
+    except TimeoutException:
+        print("Timeout error while extracting references from Processing tab.")
+    
+    return processing_refs
+
 def processing_tab(driver):
     try:
         processlist = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, 'processlist')))

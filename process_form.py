@@ -9,57 +9,56 @@ from selenium.webdriver.support import expected_conditions as EC
 def get_valid_f2f_answer(driver, main_window):
     f2f_valid_answer = None
     row_id = 2
-    max_attempts = 5 
 
-    while f2f_valid_answer is None:
-        for attempt in range(max_attempts):
-            try:
-                print(f"Processing row id {row_id}, attempt {attempt + 1}")
+    while True:
+        try:
+            print(f"Processing row id {row_id}")
 
-                client_col_next = WebDriverWait(driver, 10).until(
-                    EC.element_to_be_clickable((By.CSS_SELECTOR, f'tr[id="{row_id}"] a.newWindow.left'))
-                )
-                client_col_next.click()
-                time.sleep(3)
+            client_col_next = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, f'tr[id="{row_id}"] a.newWindow.left'))
+            )
+            client_col_next.click()
+            time.sleep(3)
 
-                all_windows_next = driver.window_handles
-                for window_next in all_windows_next:
-                    if window_next != main_window:
-                        driver.switch_to.window(window_next)
-                        break
-
-                time.sleep(1)
-                dropdown_xpath = '//*[@id="investment"]/fieldset/div[2]/div[6]/span/span[1]'
-
-                face_to_face_dropdown = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.XPATH, dropdown_xpath))
-                )
-                current_value = face_to_face_dropdown.text.strip()
-                print(f"Current value for Face to Face dropdown is {current_value}")
-
-                if current_value in ['Yes', 'No']:
-                    f2f_valid_answer = current_value
-                    print(f"Valid answer found for Face to Face dropdown: {f2f_valid_answer}")
-                    driver.close()
-                    driver.switch_to.window(main_window)
-                    return f2f_valid_answer
-                else:
-                    print(f"Invalid value '{current_value}' for Face to Face dropdown. Moving to next row.")
-                    driver.close()
-                    driver.switch_to.window(main_window)
-                    row_id += 1
+            all_windows_next = driver.window_handles
+            for window_next in all_windows_next:
+                if window_next != main_window:
+                    driver.switch_to.window(window_next)
                     break
 
-            except Exception as e:
-                print(f"Error processing row {row_id}, attempt {attempt + 1}: {str(e)}")
-                driver.switch_to.window(main_window)
-                time.sleep(2)
+            time.sleep(1)
 
-        if f2f_valid_answer is None and attempt == max_attempts - 1:
-            print(f"Failed to process row {row_id} after {max_attempts} attempts.")
+            dropdown_xpath = '//*[@id="investment"]/fieldset/div[2]/div[6]/span/span[1]'
+            face_to_face_dropdown = WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.XPATH, dropdown_xpath))
+            )
+            current_value = face_to_face_dropdown.text.strip()
+            print(f"Current value for Face to Face dropdown is {current_value}")
+
+            # If a valid answer is found, return it
+            if current_value in ['Yes', 'No']:
+                f2f_valid_answer = current_value
+                print(f"Valid answer found for Face to Face dropdown: {f2f_valid_answer}")
+                driver.close()
+                driver.switch_to.window(main_window)
+                return f2f_valid_answer
+            else:
+                print(f"Invalid value '{current_value}' for Face to Face dropdown. Moving to next row.")
+                driver.close()
+                driver.switch_to.window(main_window)
+                row_id += 1
+
+        except Exception as e:
+            print(f"Error processing row {row_id}: {str(e)}")
+            driver.switch_to.window(main_window)
             row_id += 1
 
-    return f2f_valid_answer
+            # If there are no more rows, exit and return None
+            if row_id > 5:
+                print("No valid Face to Face answer found after checking all rows.")
+                break
+
+    return None
 
 def process_form(driver, main_window, ref, nbs_df, f2f_valid_answer):
     print(f"Proceeding with valid answer: {f2f_valid_answer}")
@@ -69,23 +68,27 @@ def process_form(driver, main_window, ref, nbs_df, f2f_valid_answer):
         # client_col_first = WebDriverWait(driver, 10).until(
         #     EC.element_to_be_clickable((By.XPATH, '/html/body/div[2]/div[2]/div[2]/span/table[3]/tbody/tr[1]/td[1]/a'))
         # )
+        WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.CSS_SELECTOR, 'tr[id="1"] a#policyinfo'))
+        )
+        
         client_col_first = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, 'tr[id="1"] a#policyinfo'))
         )
         # driver.execute_script("arguments[0].scrollIntoView(true);", client_col_first) 
 
         time.sleep(1) 
-        
+            
         try:
             tooltip = driver.find_element(By.CLASS_NAME, 'ui-tooltip')
             driver.execute_script("arguments[0].style.display = 'none';", tooltip)
-            time.sleep(1)
+            # time.sleep(1)
         except:
             print("Tooltip not found or already hidden.")
             pass
 
         client_col_first.click()
-        time.sleep(3)
+        # time.sleep(3)
 
         all_windows_first = driver.window_handles
         for window_first in all_windows_first:
