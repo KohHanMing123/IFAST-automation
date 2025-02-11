@@ -7,6 +7,7 @@ import time
 from nbs_form import fill_nbs_form
 from process_form import get_valid_f2f_answer, process_form
 from commission_actions import extract_processing_refs, open_tab, processing_tab, to_payout_tab, expected_in_tab
+from utils import verify_new_record
 from colorama import init, Fore
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
@@ -46,9 +47,26 @@ for ref in nbs_df['Acc No.']:
     time.sleep(3)
 
     try:
-        fill_nbs_form(driver, ref, nbs_df, main_window)  # performs all nbs form filling
-        f2f_valid_answer = get_valid_f2f_answer(driver, main_window)
+        # getting initial deal value before filling the form
+        try:
+            first_row = driver.find_element(By.CSS_SELECTOR, 'tr[id="1"]')
+            initial_deal_value = first_row.get_attribute("deal")
+            print(f"this is the initial deal val:  {initial_deal_value}")
+        except Exception as e:
+            print(f"Error fetching initial deal value: {e}")
+            initial_deal_value = None
+        
+        fill_nbs_form(driver, ref, nbs_df, main_window)  # performs NBS form filling
+        
+        # check if a new record is created
+        is_new_record = verify_new_record(driver, initial_deal_value)
 
+        if not is_new_record:
+            print(f"Record for {ref} was not created properly. Logging error.")
+            no_records_refs.append(ref)
+            continue  # skip acc no. new record is not found
+
+        f2f_valid_answer = get_valid_f2f_answer(driver, main_window)
         if f2f_valid_answer:
             process_form(driver, main_window, ref, nbs_df, f2f_valid_answer)
         else:
@@ -154,3 +172,4 @@ driver.quit()
 
 # TODO: F2F value null handling, if no f2f value, go next, screen display is 100% on nurul comp but 125% on mine.,
 #  save button when filling nbs sometimes miss, reload fails sometimes too
+

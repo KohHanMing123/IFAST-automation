@@ -49,7 +49,7 @@ def fill_nbs_form(driver, ref, nbs_df, main_window):
 
             select_curr_element = driver.find_element(By.ID, "Currency")
             time.sleep(1)
-
+    
             desired_curr_text = nbs_data['Investment Currency']
             driver.execute_script("""
                 var select = arguments[0];
