@@ -18,6 +18,9 @@ options = webdriver.ChromeOptions()
 options.add_argument("--start-maximized")
 options.add_experimental_option("detach", True)
 
+options.add_argument("--log-level=3")
+options.add_argument("--disable-background-networking") # resolving 'Registration response error message: DEPRECATED_ENDPOINT' error
+
 # driver = webdriver.Chrome(options=options) # some issue with subprocess in machines without python
 driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
 driver.get('https://global.broker-backoffice.com//modules/investments/broker/')
